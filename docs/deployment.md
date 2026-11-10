@@ -1,12 +1,12 @@
 # Guru Mind — Deployment Guide
 
-Guru Mind separates the static/SPA **Frontend (Vercel)**, the **Express API Backend (Render)**, and **Supabase PostgreSQL / Auth**.
+Guru Mind supports **single-URL full-stack deployment on Render** (Frontend SPA + Express API together on `https://your-app.onrender.com`), or split **Frontend (Vercel)** + **Backend (Render)** with **Supabase PostgreSQL / Auth**.
 
 ## 1. Provision Supabase
 
 1. Create a new Supabase project.
 2. Open **SQL Editor** and execute [`database/migrations/0001_initial_schema.sql`](../database/migrations/0001_initial_schema.sql).
-3. In **Authentication -> Providers**, ensure Email/Password is enabled (and optionally Google OAuth with your Vercel URL added to Redirect URLs: `https://your-app.vercel.app/dashboard` and `https://your-app.vercel.app/reset-password`).
+3. In **Authentication -> Providers**, ensure Email/Password is enabled (and in **Authentication -> URL Configuration**, add your Render URL — or Vercel URL if split — to Redirect URLs: `https://your-app.onrender.com/dashboard` and `https://your-app.onrender.com/reset-password`).
 4. Copy from **Project Settings -> API**:
    - Project URL (`SUPABASE_URL`)
    - Anon / Publishable key (`SUPABASE_ANON_KEY`)
@@ -22,19 +22,19 @@ Guru Mind separates the static/SPA **Frontend (Vercel)**, the **Express API Back
    - Uses Prisma STT (`prisma-v3.0`) and Timbre TTS (`timbre-v3.0`).
    - Note: Even if `GNANI_API_KEY` is omitted during initial testing, text tutoring works via Gemini and voice degrades cleanly to browser Web Speech APIs.
 
-## 3. Deploy Backend API to Render
+## 3. Deploy Full-Stack App (or Backend API) to Render
 
 You can either click **New + -> Blueprint** in Render (auto-configured via [`render.yaml`](../render.yaml)) or create a **Web Service** manually:
 
 1. Connect this repository (branch `main`).
 2. Set:
    - **Root Directory**: `.` (monorepo root)
-   - **Build Command**: `npm ci --include=dev && npm run build --workspace=backend`
+   - **Build Command** (Full-stack Frontend + Backend on one Render URL): `npm ci --include=dev && npm run build`
    - **Start Command**: `npm run start --workspace=backend`
    - **Health Check Path**: `/api/health`
 3. Configure Environment Variables in Render:
    - `NODE_ENV=production`
-   - `CORS_ORIGIN=https://your-frontend.vercel.app`
+   - `CORS_ORIGIN=https://your-app.onrender.com` *(Render's own `RENDER_EXTERNAL_URL` is allowed automatically; add Vercel origin if split)*
    - `SUPABASE_URL`
    - `SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
@@ -47,7 +47,7 @@ You can either click **New + -> Blueprint** in Render (auto-configured via [`ren
    - `GNANI_TTS_VOICE=Shivani`
    - `AI_TIMEOUT_MS=15000`
    - `ENABLE_SKEPTIC_SECOND_PASS=false`
-4. Verify deployment by opening `https://your-api.onrender.com/api/health`.
+4. Verify deployment by opening `https://your-app.onrender.com/` (Guru Mind web UI) and `https://your-app.onrender.com/api/health`.
 
 ## 4. Deploy Frontend to Vercel
 

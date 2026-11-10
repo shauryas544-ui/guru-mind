@@ -57,13 +57,18 @@ export interface AppEnvironment {
 export function loadEnvironment(raw: NodeJS.ProcessEnv = process.env): AppEnvironment {
   const parsed = EnvSchema.parse(raw);
   const supabaseAnonKey = (parsed.SUPABASE_ANON_KEY || parsed.SUPABASE_PUBLISHABLE_KEY || "").trim();
+  const corsOrigins = Array.from(
+    new Set(
+      [...parsed.CORS_ORIGIN.split(","), raw.RENDER_EXTERNAL_URL ?? ""]
+        .map((s) => s.trim().replace(/\/+$/, ""))
+        .filter(Boolean),
+    ),
+  );
 
   return {
     port: parsed.PORT,
     nodeEnv: parsed.NODE_ENV,
-    corsOrigins: parsed.CORS_ORIGIN.split(",")
-      .map((s) => s.trim().replace(/\/+$/, ""))
-      .filter(Boolean),
+    corsOrigins,
     supabaseUrl: parsed.SUPABASE_URL.trim().replace(/\/+$/, ""),
     supabaseAnonKey,
     supabaseServiceRoleKey: parsed.SUPABASE_SERVICE_ROLE_KEY.trim(),

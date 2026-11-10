@@ -1,6 +1,10 @@
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import request from "supertest";
 import { describe, expect, it, vi } from "vitest";
 import { createApp } from "../../backend/src/app";
+import { loadEnvironment } from "../../backend/src/config/environment";
 import type { AuthContext } from "../../backend/src/types";
 
 function createFakeSupabase(userId: string) {
@@ -335,6 +339,62 @@ describe("API integration", () => {
     expect(callArg?.memory.recentMessages).toEqual([
       { role: "user", content: "I am preparing for an interview." },
       { role: "assistant", content: "Great! Let us practise introducing yourself." },
+    ]);
+  });
+
+  it("serves built frontend SPA on / and client routes while keeping /api/* returning JSON 404", async () => {
+    const tempDist = fs.mkdtempSync(path.join(os.tmpdir(), "guru-mind-dist-"));
+    try {
+      fs.writeFileSync(
+        path.join(tempDist, "index.html"),
+        "<!doctype html><html><body><div id=\"root\">Guru Mind UI</div></body></html>",
+        "utf8",
+      );
+      const spaApp = createApp({
+        serveSpa: true,
+        frontendDistDir: tempDist,
+        tokenVerifier: async (token) => {
+          if (token === "valid-token-a") {
+            return { userId: "user-a-uuid", email: "a@example.com", token, supabase: userASupabase };
+          }
+          throw new Error("Invalid token");
+        },
+      });
+
+      const homeRes = await request(spaApp).get("/");
+      expect(homeRes.status).toBe(200);
+      expect(homeRes.headers["content-type"]).toContain("text/html");
+      expect(homeRes.text).toContain("Guru Mind UI");
+
+      const routeRes = await request(spaApp).get("/mentor");
+      expect(routeRes.status).toBe(200);
+      expect(routeRes.headers["content-type"]).toContain("text/html");
+      expect(routeRes.text).toContain("Guru Mind UI");
+
+      const unauthApiMissRes = await request(spaApp).get("/api/does-not-exist");
+      expect(unauthApiMissRes.status).toBe(401);
+      expect(unauthApiMissRes.body.success).toBe(false);
+      expect(unauthApiMissRes.body.error?.code).toBe("UNAUTHORIZED");
+
+      const authApiMissRes = await request(spaApp)
+        .get("/api/does-not-exist")
+        .set("Authorization", "Bearer valid-token-a");
+      expect(authApiMissRes.status).toBe(404);
+      expect(authApiMissRes.body.success).toBe(false);
+      expect(authApiMissRes.body.error?.code).toBe("NOT_FOUND");
+    } finally {
+      fs.rmSync(tempDist, { recursive: true, force: true });
+    }
+  });
+
+  it("normalizes trailing slashes in CORS_ORIGIN and automatically allows RENDER_EXTERNAL_URL", () => {
+    const parsed = loadEnvironment({
+      CORS_ORIGIN: "https://guru-mind.onrender.com/, https://custom.example.com///",
+      RENDER_EXTERNAL_URL: "https://guru-mind.onrender.com/",
+    });
+    expect(parsed.corsOrigins).toEqual([
+      "https://guru-mind.onrender.com",
+      "https://custom.example.com",
     ]);
   });
 });

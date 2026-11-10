@@ -90,4 +90,3 @@ describe("mentor-history persistence", () => {
     expect(merged.map((m) => m.id)).toEqual(["spoken-1", "ephemeral-2", "uuid-cloud-3"]);
   });
 });
-
