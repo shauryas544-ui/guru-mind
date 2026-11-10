@@ -146,7 +146,15 @@ describe("API integration", () => {
     },
   });
 
-  it("exposes GET /api/health without leaking secrets", async () => {
+  it("exposes GET / and GET /api/health without leaking secrets", async () => {
+    const rootRes = await request(app).get("/");
+    expect(rootRes.status).toBe(200);
+    expect(rootRes.body.success).toBe(true);
+    expect(rootRes.body.data.service).toBe("guru-mind-api");
+
+    const headRes = await request(app).head("/");
+    expect(headRes.status).toBe(200);
+
     const res = await request(app).get("/api/health");
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
