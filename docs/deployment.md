@@ -16,7 +16,7 @@ Guru Mind separates the static/SPA **Frontend (Vercel)**, the **Express API Back
 
 1. **Google Gemini API Key (`GEMINI_API_KEY`)**
    - Create a key in Google AI Studio (`https://aistudio.google.com/apikey`).
-   - Recommended model: `gemini-2.5-flash`.
+   - Recommended model: `gemini-3.5-flash-lite` (with automatic hedged failover to `gemini-3-flash-preview` / `gemini-flash-lite-latest`).
 2. **Gnani AI Vachana API Key (`GNANI_API_KEY`)**
    - Obtain a Vachana API key from Gnani AI (`https://vachana.ai` / `https://api.vachana.ai`).
    - Uses Prisma STT (`prisma-v3.0`) and Timbre TTS (`timbre-v3.0`).
@@ -24,26 +24,29 @@ Guru Mind separates the static/SPA **Frontend (Vercel)**, the **Express API Back
 
 ## 3. Deploy Backend API to Render
 
-1. Create a **Web Service** on Render pointing to this repository.
+You can either click **New + -> Blueprint** in Render (auto-configured via [`render.yaml`](../render.yaml)) or create a **Web Service** manually:
+
+1. Connect this repository (branch `main`).
 2. Set:
-   - **Root Directory**: `.` (monorepo root) or `backend`
-   - **Build Command**: `npm install && npm run build --workspace=backend`
+   - **Root Directory**: `.` (monorepo root)
+   - **Build Command**: `npm ci --include=dev && npm run build --workspace=backend`
    - **Start Command**: `npm run start --workspace=backend`
+   - **Health Check Path**: `/api/health`
 3. Configure Environment Variables in Render:
    - `NODE_ENV=production`
-   - `PORT=4000` (or Render-assigned `PORT`)
    - `CORS_ORIGIN=https://your-frontend.vercel.app`
    - `SUPABASE_URL`
    - `SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `GEMINI_API_KEY`
-   - `GEMINI_MODEL=gemini-2.5-flash`
+   - `GEMINI_MODEL=gemini-3.5-flash-lite`
    - `GNANI_API_KEY`
    - `GNANI_BASE_URL=https://api.vachana.ai`
    - `GNANI_STT_MODEL=prisma-v3.0`
    - `GNANI_TTS_MODEL=timbre-v3.0`
    - `GNANI_TTS_VOICE=Shivani`
-   - `AI_TIMEOUT_MS=25000`
+   - `AI_TIMEOUT_MS=15000`
+   - `ENABLE_SKEPTIC_SECOND_PASS=false`
 4. Verify deployment by opening `https://your-api.onrender.com/api/health`.
 
 ## 4. Deploy Frontend to Vercel

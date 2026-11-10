@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: guru-mind-api
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: npm ci --include=dev && npm run build --workspace=backend
+    startCommand: npm run start --workspace=backend
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ORIGIN
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+      - key: GNANI_API_KEY
+        sync: false
+      - key: GNANI_BASE_URL
+        value: https://api.vachana.ai
+      - key: GNANI_STT_MODEL
+        value: prisma-v3.0
+      - key: GNANI_TTS_MODEL
+        value: timbre-v3.0
+      - key: GNANI_TTS_VOICE
+        value: Shivani
+      - key: AI_TIMEOUT_MS
+        value: "15000"
+      - key: ENABLE_SKEPTIC_SECOND_PASS
+        value: "false"
