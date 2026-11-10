@@ -62,7 +62,7 @@ export function loadEnvironment(raw: NodeJS.ProcessEnv = process.env): AppEnviro
     port: parsed.PORT,
     nodeEnv: parsed.NODE_ENV,
     corsOrigins: parsed.CORS_ORIGIN.split(",")
-      .map((s) => s.trim())
+      .map((s) => s.trim().replace(/\/+$/, ""))
       .filter(Boolean),
     supabaseUrl: parsed.SUPABASE_URL.trim().replace(/\/+$/, ""),
     supabaseAnonKey,

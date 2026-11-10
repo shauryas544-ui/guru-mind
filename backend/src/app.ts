@@ -15,8 +15,9 @@ export interface AppOptions {
 export function createApp(options: AppOptions = {}): Express {
   const app = express();
 
+  app.set("trust proxy", 1);
   app.use(requestIdMiddleware);
-  app.use(helmet());
+  app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
   app.use(
     cors({
       origin: (origin, callback) => {
