@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment variables (never commit real API keys!)
+.env
+.env.local
+.env.*.local
+frontend/.env
+backend/.env
+
+# Build outputs
+dist/
+build/
+.output/
+.vinxi/
+backend/dist/
+frontend/dist/
+
+# Logs & caches
+*.log
+npm-debug.log*
+.vite/
+.turbo/
+.tanstack/
+coverage/
+*.tsbuildinfo
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+

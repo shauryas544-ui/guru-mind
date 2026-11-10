@@ -1,0 +1,33 @@
+{
+  "name": "guru-mind",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Guru Mind — AI-powered Personal Language Tutor & Mentor Platform (Gemini AI + Gnani AI + Supabase)",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n API,WEB -c cyan,magenta \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "build": "npm run build --workspace=backend && npm run build --workspace=frontend",
+    "typecheck": "npm run typecheck --workspace=backend && npm run typecheck --workspace=frontend",
+    "test": "vitest run",
+    "test:frontend": "npm run test --workspace=frontend",
+    "test:backend": "vitest run --config vitest.config.ts",
+    "lint": "npm run lint --workspace=frontend"
+  },
+  "devDependencies": {
+    "@types/node": "^22.16.5",
+    "@types/supertest": "^6.0.2",
+    "concurrently": "^9.1.2",
+    "supertest": "^7.0.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.0.9"
+  }
+}
+
